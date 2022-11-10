@@ -11,7 +11,7 @@ def mtspec(x: np.array,
                   t_fact: int = 1):
     """
     Calculates the multitaper spectrogram. Uses overlapping Hermite windows. 
-    The multitaper spectrogram will be a tensor of dim
+    The multitaper spectrogram will be a matrix of dim
     nfft/2 x ceil(signal length/t_fact).
     
     Parameters
@@ -101,10 +101,10 @@ def _spect(x, Win, nfft, t_fact):
     N = x.size
     
     # STFTs (assumes real valued signal)
-    E = math.sqrt(nfft * t_fact)
     ind = -1
     nfft2 = int(nfft/2)
-    ind_max = int(math.ceil((N-M)/t_fact)) 
+    ind_max = int(math.ceil((N-M)/t_fact))
+    E = math.sqrt(nfft / t_fact)
     F = np.empty((K, ind_max, nfft2), dtype=complex)
     for j in range(0, N-M, t_fact):
         ind = ind + 1
@@ -114,5 +114,5 @@ def _spect(x, Win, nfft, t_fact):
        
     # Multitaper spectrogram
     MTS = np.mean(np.square(abs(F)), axis=0)
-    
+
     return MTS.T
