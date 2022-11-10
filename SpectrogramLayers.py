@@ -42,7 +42,7 @@ class SpecDataset(torch.utils.data.Dataset):
         X -= torch.mean(X, dim=1, keepdim=True)
         X /= torch.linalg.norm(X, dim=1, keepdim=True)
         
-        # Calculate spectrogram
+        # Calculate spectrograms
         nbr_samples, X_length = X.shape
         t_size = int(math.ceil(X_length/t_fact))
         Win = _hermitewin(K, p*fs, X_length)
@@ -91,22 +91,26 @@ class mtSpecLayer(torch.nn.Module):
                  K_out: bool = True):
         super().__init__()
         
+        # Weights
         self.w = torch.nn.Parameter(torch.ones(K,
                                                dtype=torch.float,
                                                requires_grad=True) / K)
+        # Number of in and out channels
         self.K = K
         if K_out:
             self.out_channels = K
         else:
             self.out_channels = 1
+    
     def forward(self, x):
-        batches, t_size, f_size = x.shape[0], x.shape[2], x.shape[3]
-        S = torch.empty(size=(batches, self.K, t_size, f_size), dtype=torch.float)
-        for batch in range(batches):
-            S[batch, :, :, :] = self.w.unsqueeze(dim=1).unsqueeze(dim=2) * x[batch]
+        # Multiply by weights
+        x = self.w.view((1, self.K, 1, 1)) * x
+        
+        # Weighted sum if K_out = False
         if self.out_channels == 1:
-            S = torch.sum(S, dim=1, keepdim=True)
-        return S
+            x = torch.sum(x, dim=1, keepdim=True)
+        
+        return x
 
 # --- Help functions ---
 # Hermite windows
