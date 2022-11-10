@@ -127,7 +127,7 @@ def _stft(x, Win, tWin, dWin, nfft, t_fact):
     N = x.size
     
     # STFTs (assumes real valued signal)
-    E = math.sqrt(nfft * t_fact)
+    E = math.sqrt(nfft / t_fact)
     ind = -1
     nfft2 = int(nfft/2)
     ind_max = int(math.ceil((N-M)/t_fact)) 
